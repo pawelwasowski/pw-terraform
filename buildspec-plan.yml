@@ -18,8 +18,8 @@ phases:
 
   build:
     commands:
-      - echo -e "RUN terraform init -no-color"
-      - terraform init -no-color
+      - echo -e "RUN terraform init"
+      - terraform init
       - bash scripts/init-workspace.sh $STAGE
       - terraform workspace select $STAGE
       - terraform plan -var-file=tfvars/$STAGE.tfvars
