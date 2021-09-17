@@ -13,11 +13,12 @@ phases:
       - unzip terraform_"$TF_VERSION"_linux_amd64.zip
       - mv terraform /usr/local/bin/
       - rm terraform_"$TF_VERSION"_linux_amd64.zip
-      - terraform version
+      - terraform --version
       - echo $STAGE
 
   build:
     commands:
+      - cp ./backend/terraform.tf .
       - echo -e "RUN terraform init"
       - terraform init
       - bash scripts/init-workspace.sh $STAGE

@@ -1,9 +1,9 @@
 terraform {
   backend "s3" {
-    bucket = var.terraform-config.bucket
-    key = var.terraform-config.bucket-key
-    region = var.terraform-config.region
-    role_arn = var.terraform-config.role-arn
+    bucket = "e-mobility-terraform-remote-state"
+    key = "e-mobility"
+    region = "eu-central-1"
+    role_arn = "arn:aws:iam::718665970908:role/e-mobility-terraform"
   }
   required_providers {
     aws = "~> 3.59.0"
