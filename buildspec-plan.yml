@@ -1,0 +1,29 @@
+
+version: 0.2
+
+env:
+  variables:
+    TF_VERSION: "1.0.7"
+    TF_LOG: "DEBUG"
+
+phases:
+  pre_build:
+    commands:
+      - wget https://releases.hashicorp.com/terraform/$TF_VERSION/terraform_"$TF_VERSION"_linux_amd64.zip >/dev/null 2>&1
+      - unzip terraform_"$TF_VERSION"_linux_amd64.zip
+      - sudo mv terraform /bin
+      - rm terraform_"$TF_VERSION"_linux_amd64.zip
+      - echo $STAGE
+
+  build:
+    commands:
+      - echo -e "RUN terraform init -no-color"
+      - terraform init -no-color
+      - bash scripts/init-workspace.sh $STAGE
+      - terraform workspace select $STAGE
+      - terraform plan -var-file=tfvars/$STAGE.tfvars
+
+
+artifacts:
+  files:
+    - terraform.tar
