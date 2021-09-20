@@ -30,4 +30,3 @@ artifacts:
     - plan-file
     - buildspec-apply.yml
     - backend/remote-backend-config.tf
-    - tfvars/**/*

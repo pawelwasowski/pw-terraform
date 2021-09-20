@@ -20,6 +20,6 @@ phases:
       - cp ./backend/remote-backend-config.tf .
       - terraform init
       - terraform workspace select $STAGE
-      - terraform apply -var-file=tfvars/$STAGE.tfvars -auto-approve -no-color -input=false plan-file
+      - terraform apply -auto-approve -no-color -input=false plan-file
 
 
