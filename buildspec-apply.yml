@@ -17,6 +17,9 @@ phases:
   build:
     commands:
       - tar xf terraform.tar
+      - cp ./backend/remote-backend-config.tf .
+      - terraform init
+      - terraform workspace select $STAGE
       - terraform apply -var-file=tfvars/$STAGE.tfvars -auto-approve -no-color
 
 
