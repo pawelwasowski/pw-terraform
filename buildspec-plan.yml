@@ -28,3 +28,4 @@ artifacts:
   files:
     - terraform.tar
     - buildspec-apply.yml
+    - backend/remote-backend-config.tf
