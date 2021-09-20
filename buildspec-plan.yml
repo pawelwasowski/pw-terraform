@@ -17,7 +17,6 @@ phases:
   build:
     commands:
       - cp ./backend/remote-backend-config.tf .
-      - echo -e "RUN terraform init"
       - terraform init
       - bash scripts/init-workspace.sh $STAGE
       - terraform workspace select $STAGE
