@@ -22,8 +22,10 @@ phases:
       - bash scripts/init-workspace.sh $STAGE
       - terraform workspace select $STAGE
       - terraform plan -var-file=tfvars/$STAGE.tfvars
+      - tar cf terraform.tar .terraform
 
 
 artifacts:
   files:
-    - .terraform/**/*
+    - terraform.tar
+    - buildspec-apply.yml

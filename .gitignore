@@ -2,3 +2,4 @@
 .terraform
 terraform.tar
 *.tfstate
+.terraform.lock.hcl

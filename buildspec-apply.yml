@@ -16,10 +16,8 @@ phases:
 
   build:
     commands:
+      - tar xf terraform.tar
       - terraform workspace select $STAGE
       - terraform apply -var-file=tfvars/$STAGE.tfvars -auto-approve -no-color
 
 
-artifacts:
-  files:
-    - terraform.tar
