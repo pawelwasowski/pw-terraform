@@ -16,12 +16,8 @@ phases:
 
   build:
     commands:
-      - cp ./backend/remote-backend-config.tf .
-      - echo -e "RUN terraform init"
-      - terraform init
-      - bash scripts/init-workspace.sh $STAGE
       - terraform workspace select $STAGE
-      - terraform plan -var-file=tfvars/$STAGE.tfvars
+      - terraform apply -var-file=tfvars/$STAGE.tfvars -auto-approve -no-color
 
 
 artifacts:
