@@ -52,12 +52,10 @@ jobs:
 
       - name: Update Pull Request
         uses: actions-ecosystem/action-create-comment@v1
-        env:
-          PLAN: "terraform\n${{ steps.plan.outputs.stdout }}"
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           body: |
-            ${{process.env.PLAN}}
+            terraform\n${{ steps.plan.outputs.stdout }}
 
       - name: Terraform Plan Status
         if: steps.plan.outcome == 'failure'
