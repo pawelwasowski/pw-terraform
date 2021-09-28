@@ -3,7 +3,7 @@ terraform {
     bucket = "e-mobility-terraform-remote-state"
     key = "e-mobility"
     region = "eu-central-1"
-    role_arn = "arn:aws:iam::718665970908:role/e-mobility-terraform"
+    role_arn = "arn:aws:iam::718665970908:role/e-mobility-terraform-state-manager"
   }
   required_providers {
     aws = "~> 3.59.0"
