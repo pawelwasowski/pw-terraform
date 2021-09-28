@@ -11,11 +11,9 @@ jobs:
       id-token: write
       contents: read
     steps:
-      - run: sleep 5 # there's still a race condition for now
-
       - name: Configure AWS
         run: |
-          export AWS_ROLE_ARN=arn:aws:iam::718665970908:role/e-mobility-terraform
+          export AWS_ROLE_ARN=arn:aws:iam::718665970908:role/e-mobility-github-actions
           export AWS_WEB_IDENTITY_TOKEN_FILE=/tmp/awscreds
           export AWS_DEFAULT_REGION=eu-central-1
 
