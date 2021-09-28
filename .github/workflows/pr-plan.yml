@@ -1,6 +1,6 @@
 name: Create Terraform Plan on each PR
 on:
-  push:
+  pull_request:
     branches:
       - main
 
