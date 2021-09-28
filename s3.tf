@@ -1,4 +1,4 @@
-resource "aws_s3_bucket" "example" {
-  bucket = "e-mobility-xample-bucket"
-  acl    = "private"
-}
+#resource "aws_s3_bucket" "example" {
+#  bucket = "e-mobility-xample-bucket"
+#  acl    = "private"
+#}
