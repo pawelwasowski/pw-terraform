@@ -57,7 +57,7 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           body: |
-            Hello, @${{ github.actor }}!
+            @${{ PLAN }}!
 
       - name: Terraform Plan Status
         if: steps.plan.outcome == 'failure'
