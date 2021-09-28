@@ -1,6 +1,6 @@
 name: Create Terraform Plan on each PR
 on:
-  pull_request:
+  push:
     branches:
       - main
 
@@ -32,6 +32,9 @@ jobs:
         uses: hashicorp/setup-terraform@v1
         with:
           terraform_version: 1.0.7
+
+      - uses: actions/checkout@v2
+
       - name: Terraform init
         run: |
           terraform version
