@@ -49,6 +49,7 @@ jobs:
       - name: Terraform plan
         id: plan
         run: |
+          aws sts get-caller-identity
           terraform plan -var-file=tfvars/dev.tfvars -input=false
         continue-on-error: true
 
