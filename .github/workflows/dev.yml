@@ -50,8 +50,16 @@ jobs:
       - name: Terraform plan
         id: plan
         run: |
-          terraform plan -var-file=tfvars/dev.tfvars -input=false -no-color
+          terraform plan -var-file=tfvars/dev.tfvars -input=false -no-color -out plan-file
+          tar cf terraform.tar plan-file .terraform
         continue-on-error: true
+
+      - name: Upload job artifcat
+        uses: actions/upload-artifact@v2
+        with:
+          name: terraform.tar
+          path: terraform.tar
+
 
       - name: Update Pull Request
         uses: actions-ecosystem/action-create-comment@v1
@@ -73,8 +81,13 @@ jobs:
       id-token: write
       contents: read
     steps:
+      - name: Download Artifact
+        uses: actions/download-artifact@v2
+        with:
+          name: terraform.tar
       - name: Terraform apply
-        run: terraform apply -auto-approve
-
+        run: |
+          tar xf terraform.tar
+          terraform apply -auto-approve -no-color -input=false plan-file
 
 
