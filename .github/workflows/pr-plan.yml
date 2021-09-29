@@ -39,7 +39,7 @@ jobs:
         id: init
         run: |
           terraform version
-          cp ./backend/remote-backend-config-dev.tf .
+#          cp ./backend/remote-backend-config-dev.tf .
           terraform init
           bash scripts/init-workspace.sh dev
           terraform workspace select dev
