@@ -76,6 +76,7 @@ jobs:
     name: Apply terraform changes
     if: github.event.ref == 'refs/heads/develop' && github.event_name == 'push'
     needs: [TerraformPlan]
+    environment: 'dev'
     runs-on: ubuntu-latest
     permissions:
       id-token: write
