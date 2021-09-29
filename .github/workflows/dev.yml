@@ -1,11 +1,15 @@
-name: Create Terraform Plan on each PR
+name: Dev workload
 on:
   pull_request:
     branches:
-      - main
+      - develop
+  push:
+    branches:
+      - develop
 
 jobs:
-  build:
+  plan:
+    name: plan terraform changes
     runs-on: ubuntu-latest
     permissions:
       id-token: write
@@ -51,6 +55,7 @@ jobs:
 
       - name: Update Pull Request
         uses: actions-ecosystem/action-create-comment@v1
+        if: github.event_name == 'pull_request'
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           body: |
@@ -59,4 +64,16 @@ jobs:
       - name: Terraform Plan Status
         if: steps.plan.outcome == 'failure'
         run: exit 1
+  apply:
+    name: Apply terraform changes
+    if: github.event.ref == 'refs/heads/develop' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - name: Terraform apply
+        run: terraform apply -auto-approve
+
+
 
