@@ -1,7 +1,7 @@
 terraform {
   backend "s3" {
     bucket = "e-mobility-terraform-remote-state"
-    key = "e-mobility"
+    key    = "e-mobility"
     region = "eu-central-1"
   }
   required_providers {
