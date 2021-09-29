@@ -1,6 +1,6 @@
 terraform {
   backend "s3" {
-    bucket = "e-mobility-terraform-remote-state"
+    bucket = "terraform-remote-state"
     key    = "e-mobility"
     region = "eu-central-1"
   }
