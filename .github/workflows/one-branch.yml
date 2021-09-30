@@ -83,6 +83,7 @@ jobs:
     name: Apply tfm DEV
     if: github.event.ref == 'refs/heads/main' && github.event_name == 'push'
     environment: 'dev'
+    needs: [TerraformPlanDev]
     runs-on: ubuntu-latest
     permissions:
       id-token: write
@@ -136,6 +137,7 @@ jobs:
       contents: read
       pull-requests: write
     steps:
+      - run: sleep 5 # there's still a race condition for now
       - name: Configure AWS
         run: |
           echo $AWS_ROLE_ARN_PROD
