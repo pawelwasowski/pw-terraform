@@ -4,3 +4,6 @@ variable "product" {
 variable "stage" {
   type = string
 }
+variable "terraform-role" {
+  type = string
+}
