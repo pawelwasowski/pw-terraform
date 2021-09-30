@@ -114,6 +114,12 @@ jobs:
         run: |
           tar xf plan-dev.tar
 
+      - name: Terraform init
+        id: init
+        run: |
+          terraform version
+          terraform init
+
       - name: Terraform apply
         run: |
           terraform apply -auto-approve -no-color -input=false plan-file
