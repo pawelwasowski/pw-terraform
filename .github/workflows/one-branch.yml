@@ -52,7 +52,7 @@ jobs:
         id: plan
         run: |
           terraform plan -var-file=tfvars/dev.tfvars -input=false -no-color -out plan-file
-          tar cf terraform.tar plan-file .terraform
+          tar cf terraform.tar plan-file
         continue-on-error: true
 
       - name: Upload job artifcat
@@ -83,10 +83,6 @@ jobs:
       id-token: write
       contents: read
     steps:
-      - name: Download Artifact
-        uses: actions/download-artifact@v2
-        with:
-          name: terraform.tar
       - name: Configure AWS
         run: |
           export AWS_ROLE_ARN=arn:aws:iam::718665970908:role/pw-dev-terraform-state-manager
@@ -99,10 +95,27 @@ jobs:
 
           curl -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" "$ACTIONS_ID_TOKEN_REQUEST_URL" | jq -r '.value' > $AWS_WEB_IDENTITY_TOKEN_FILE
 
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v1
+        with:
+          terraform_version: $TERRAFORM_VERSION
+
+      - name: Terraform init
+        id: init
+        run: |
+          terraform version
+          terraform init
+
+      - name: Download Artifact
+        uses: actions/download-artifact@v2
+        with:
+          name: terraform.tar
+
       - name: Terraform apply
         run: |
           tar xf terraform.tar
           terraform apply -auto-approve -no-color -input=false plan-file
+
   TerraformPlanProd:
     name: Plan tfm PROD
     runs-on: ubuntu-latest
