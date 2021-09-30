@@ -52,17 +52,9 @@ jobs:
         id: plan
         run: |
           terraform plan -var-file=tfvars/dev.tfvars -input=false -no-color -out plan-file
-          tar cf terraform.tar plan-file
         continue-on-error: true
 
-      - name: Upload job artifcat
-        uses: actions/upload-artifact@v2
-        with:
-          name: terraform.tar
-          path: terraform.tar
-
-
-      - name: Update Pull Request
+      - name: Save Terraform Plan as PR Comment
         uses: actions-ecosystem/action-create-comment@v1
         if: github.event_name == 'pull_request'
         with:
@@ -73,6 +65,19 @@ jobs:
       - name: Terraform Plan Status
         if: steps.plan.outcome == 'failure'
         run: exit 1
+
+      - name: Prepare artifact
+        run: |
+          tar cf plan-dev.tar plan-file .terraform
+
+      - name: Upload artifact
+        if: github.event.ref == 'refs/heads/main' && github.event_name == 'push'
+        uses: actions/upload-artifact@v2
+        with:
+          name: plan-dev.tar
+          path: plan-dev.tar
+
+
   TerraformApplyDev:
     name: Apply tfm DEV
     if: github.event.ref == 'refs/heads/main' && github.event_name == 'push'
@@ -83,8 +88,6 @@ jobs:
       id-token: write
       contents: read
     steps:
-      - uses: actions/checkout@v2
-
       - name: Configure AWS
         run: |
           export AWS_ROLE_ARN=arn:aws:iam::718665970908:role/pw-dev-terraform-state-manager
@@ -102,20 +105,17 @@ jobs:
         with:
           terraform_version: $TERRAFORM_VERSION
 
-      - name: Terraform init
-        id: init
-        run: |
-          terraform version
-          terraform init
-
       - name: Download Artifact
         uses: actions/download-artifact@v2
         with:
-          name: terraform.tar
+          name: plan-dev.tar
+
+      - name: Unzip artifact
+        run: |
+          tar xf terraform.tar
 
       - name: Terraform apply
         run: |
-          tar xf terraform.tar
           terraform apply -auto-approve -no-color -input=false plan-file
 
   TerraformPlanProd:
