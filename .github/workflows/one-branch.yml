@@ -131,7 +131,6 @@ jobs:
   TerraformPlanProd:
     name: Plan tfm PROD
     runs-on: ubuntu-latest
-    needs: [TerraformApplyDev]
     environment: 'prod'
     permissions:
       id-token: write
