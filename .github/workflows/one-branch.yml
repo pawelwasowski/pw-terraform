@@ -112,7 +112,7 @@ jobs:
 
       - name: Unzip artifact
         run: |
-          tar xf terraform.tar
+          tar xf plan-dev.tar
 
       - name: Terraform apply
         run: |
