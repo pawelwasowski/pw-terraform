@@ -130,6 +130,7 @@ jobs:
     name: Plan tfm PROD
     runs-on: ubuntu-latest
     needs: [TerraformApplyDev]
+    environment: 'prod'
     permissions:
       id-token: write
       contents: read
@@ -152,37 +153,79 @@ jobs:
         with:
           terraform_version: $TERRAFORM_VERSION
 
+      - uses: actions/checkout@v2
+
+      - name: Terraform Format
+        id: fmt
+        run: terraform fmt -check -recursive
+
       - name: Terraform init
         id: init
         run: |
           terraform version
           terraform init
-          bash scripts/init-workspace.sh dev
-          terraform workspace select dev
+          bash scripts/init-workspace.sh prod
+          terraform workspace select prod
 
       - name: Terraform plan
         id: plan
         run: |
-          terraform plan -var-file=tfvars/dev.tfvars -input=false -no-color -out plan-file
-          tar cf terraform.tar plan-file .terraform
-        continue-on-error: true
+          terraform plan -var-file=tfvars/prod.tfvars -input=false -no-color -out plan-file
 
-      - name: Upload job artifcat
+      - name: Prepare artifact
+        run: |
+          tar cf plan-prod.tar plan-file .terraform
+
+      - name: Upload artifact
         uses: actions/upload-artifact@v2
         with:
-          name: terraform.tar
-          path: terraform.tar
+          name: plan-prod.tar
+          path: plan-prod.tar
 
+  TerraformApplyProd:
+    name: Apply tfm PROD
+    needs: [TerraformPlanProd]
+    environment: 'prod'
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - name: Configure AWS
+        run: |
+          export AWS_ROLE_ARN=arn:aws:iam::718665970908:role/pw-prod-terraform-state-manager
+          export AWS_WEB_IDENTITY_TOKEN_FILE=/tmp/awscreds
+          export AWS_DEFAULT_REGION=eu-central-1
 
-      - name: Update Pull Request
-        uses: actions-ecosystem/action-create-comment@v1
-        if: github.event_name == 'pull_request'
+          echo AWS_WEB_IDENTITY_TOKEN_FILE=$AWS_WEB_IDENTITY_TOKEN_FILE >> $GITHUB_ENV
+          echo AWS_ROLE_ARN=$AWS_ROLE_ARN >> $GITHUB_ENV
+          echo AWS_DEFAULT_REGION=$AWS_DEFAULT_REGION >> $GITHUB_ENV
+
+          curl -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" "$ACTIONS_ID_TOKEN_REQUEST_URL" | jq -r '.value' > $AWS_WEB_IDENTITY_TOKEN_FILE
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v1
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          body: |
-            ${{ steps.plan.outputs.stdout }}
+          terraform_version: $TERRAFORM_VERSION
 
-      - name: Terraform Plan Status
-        if: steps.plan.outcome == 'failure'
-        run: exit 1
+      - uses: actions/checkout@v2
+
+      - name: Download Artifact
+        uses: actions/download-artifact@v2
+        with:
+          name: plan-prod.tar
+
+      - name: Unzip artifact
+        run: |
+          tar xf plan-prod.tar
+
+      - name: Terraform init
+        id: init
+        run: |
+          terraform version
+          terraform init
+
+      - name: Terraform apply
+        run: |
+          terraform apply -auto-approve -no-color -input=false plan-file
 
