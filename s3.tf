@@ -1,4 +1,4 @@
-resource "aws_s3_bucket" "example" {
-  bucket = "e-mobility-xample-bucket"
+resource "aws_s3_bucket" "test" {
+  bucket = "${var.product}-${var.stage}-test"
   acl    = "private"
 }
