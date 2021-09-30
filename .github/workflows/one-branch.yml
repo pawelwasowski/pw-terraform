@@ -13,6 +13,7 @@ env:
 jobs:
   TerraformPlanDev:
     name: Plan tfm DEV
+    needs: [TerraformApplyProd]
     runs-on: ubuntu-latest
     permissions:
       id-token: write
@@ -82,7 +83,6 @@ jobs:
   TerraformApplyDev:
     name: Apply tfm DEV
     if: github.event.ref == 'refs/heads/main' && github.event_name == 'push'
-    needs: [TerraformPlanDev]
     environment: 'dev'
     runs-on: ubuntu-latest
     permissions:
