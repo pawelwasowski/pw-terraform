@@ -103,7 +103,7 @@ jobs:
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v1
         with:
-          terraform_version: $TERRAFORM_VERSION
+          terraform_version: ${{ env.TERRAFORM_VERSION }}
 
       - uses: actions/checkout@v2
 
@@ -151,7 +151,7 @@ jobs:
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v1
         with:
-          terraform_version: $TERRAFORM_VERSION
+          terraform_version: ${{ env.TERRAFORM_VERSION }}
 
       - uses: actions/checkout@v2
 
@@ -206,7 +206,7 @@ jobs:
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v1
         with:
-          terraform_version: $TERRAFORM_VERSION
+          terraform_version: ${{ env.TERRAFORM_VERSION }}
 
       - uses: actions/checkout@v2
 
