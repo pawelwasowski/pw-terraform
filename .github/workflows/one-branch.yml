@@ -13,7 +13,6 @@ env:
 jobs:
   TerraformPlanDev:
     name: Plan tfm DEV
-    needs: [TerraformApplyProd]
     runs-on: ubuntu-latest
     permissions:
       id-token: write
