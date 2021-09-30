@@ -92,7 +92,7 @@ jobs:
     steps:
       - name: Configure AWS
         run: |
-          export AWS_ROLE_ARN=arn:aws:iam::718665970908:role/pw-dev-terraform-state-manager
+          export AWS_ROLE_ARN=$AWS_ROLE_ARN_DEV
           export AWS_WEB_IDENTITY_TOKEN_FILE=/tmp/awscreds
           export AWS_DEFAULT_REGION=eu-central-1
 
@@ -140,7 +140,7 @@ jobs:
     steps:
       - name: Configure AWS
         run: |
-          export AWS_ROLE_ARN=arn:aws:iam::416419186814:role/pv-prod-terraform-deployer
+          export AWS_ROLE_ARN=$AWS_ROLE_ARN_PROD
           export AWS_WEB_IDENTITY_TOKEN_FILE=/tmp/awscreds
           export AWS_DEFAULT_REGION=eu-central-1
 
@@ -195,7 +195,7 @@ jobs:
     steps:
       - name: Configure AWS
         run: |
-          export AWS_ROLE_ARN=arn:aws:iam::416419186814:role/pv-prod-terraform-state-manager
+          export AWS_ROLE_ARN=$AWS_ROLE_ARN_PROD
           export AWS_WEB_IDENTITY_TOKEN_FILE=/tmp/awscreds
           export AWS_DEFAULT_REGION=eu-central-1
 
