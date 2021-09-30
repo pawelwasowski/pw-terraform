@@ -83,6 +83,8 @@ jobs:
       id-token: write
       contents: read
     steps:
+      - uses: actions/checkout@v2
+
       - name: Configure AWS
         run: |
           export AWS_ROLE_ARN=arn:aws:iam::718665970908:role/pw-dev-terraform-state-manager
