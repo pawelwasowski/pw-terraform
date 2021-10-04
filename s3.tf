@@ -10,3 +10,7 @@ resource "aws_s3_bucket" "test3" {
   bucket = "${var.product}-${var.stage}-test3"
   acl    = "private"
 }
+resource "aws_s3_bucket" "test5" {
+  bucket = "${var.product}-${var.stage}-test5"
+  acl    = "private"
+}
