@@ -16,7 +16,7 @@ jobs:
   TerraformPlanProd:
     name: Plan tfm Prod
     runs-on: ubuntu-latest
-      environment: 'prod'
+    environment: 'prod'
     concurrency:
       group: prod-workload
     permissions:
