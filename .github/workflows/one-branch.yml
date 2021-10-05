@@ -2,10 +2,10 @@ name: One Branch Workload
 on:
   pull_request:
     branches:
-      - main
+      - maintemp
   push:
     branches:
-      - main
+      - maintemp
 env:
   TERRAFORM_VERSION: 1.0.8
   AWS_ROLE_ARN_DEV: arn:aws:iam::718665970908:role/pw-dev-terraform-state-manager

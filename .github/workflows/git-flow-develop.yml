@@ -8,13 +8,16 @@ on:
       - develop
 env:
   TERRAFORM_VERSION: 1.0.8
-  AWS_ROLE_ARN_DEV: arn:aws:iam::718665970908:role/pw-dev-terraform-state-manager
+  AWS_ROLE_ARN: arn:aws:iam::718665970908:role/pw-dev-terraform-state-manager
+  AWS_S3_ARTIFACTS_BUCKET_NAME: pw-dev-terraform-github-artifacts
+  AWS_WEB_IDENTITY_TOKEN_FILE: /tmp/awscreds
+  AWS_DEFAULT_REGION: eu-central-1
 jobs:
   TerraformPlanDev:
     name: Plan tfm DEV
     runs-on: ubuntu-latest
     concurrency:
-      group: dev-plan
+      group: dev-workload
     permissions:
       id-token: write
       contents: read
@@ -22,10 +25,6 @@ jobs:
     steps:
       - name: Configure AWS
         run: |
-          export AWS_ROLE_ARN=$AWS_ROLE_ARN_DEV
-          export AWS_WEB_IDENTITY_TOKEN_FILE=/tmp/awscreds
-          export AWS_DEFAULT_REGION=eu-central-1
-
           echo AWS_WEB_IDENTITY_TOKEN_FILE=$AWS_WEB_IDENTITY_TOKEN_FILE >> $GITHUB_ENV
           echo AWS_ROLE_ARN=$AWS_ROLE_ARN >> $GITHUB_ENV
           echo AWS_DEFAULT_REGION=$AWS_DEFAULT_REGION >> $GITHUB_ENV
@@ -78,10 +77,10 @@ jobs:
 
       - name: Upload artifact
         if: github.event.ref == 'refs/heads/develop' && github.event_name == 'push'
-        uses: actions/upload-artifact@v2
-        with:
-          name: plan-dev.tar
-          path: plan-dev.tar
+        run: |
+          export GIT_HASH=$(git rev-parse --short "$GITHUB_SHA")
+          echo $GIT_HASH
+          aws s3 cp plan-dev.tar s3://$AWS_S3_ARTIFACTS_BUCKET_NAME/$GIT_HASH/plan-dev.tar
 
   TerraformApplyDev:
     name: Apply tfm DEV
@@ -89,7 +88,7 @@ jobs:
     needs: [TerraformPlanDev]
     environment: 'dev'
     concurrency:
-      group: dev-apply
+      group: dev-workload
     runs-on: ubuntu-latest
     permissions:
       id-token: write
@@ -97,10 +96,6 @@ jobs:
     steps:
       - name: Configure AWS
         run: |
-          export AWS_ROLE_ARN=$AWS_ROLE_ARN_DEV
-          export AWS_WEB_IDENTITY_TOKEN_FILE=/tmp/awscreds
-          export AWS_DEFAULT_REGION=eu-central-1
-
           echo AWS_WEB_IDENTITY_TOKEN_FILE=$AWS_WEB_IDENTITY_TOKEN_FILE >> $GITHUB_ENV
           echo AWS_ROLE_ARN=$AWS_ROLE_ARN >> $GITHUB_ENV
           echo AWS_DEFAULT_REGION=$AWS_DEFAULT_REGION >> $GITHUB_ENV
@@ -118,9 +113,10 @@ jobs:
         run: cp ./backends/remote-backend-config-dev.tf .
 
       - name: Download Artifact
-        uses: actions/download-artifact@v2
-        with:
-          name: plan-dev.tar
+        run: |
+          export GIT_HASH=$(git rev-parse --short "$GITHUB_SHA")
+          echo $GIT_HASH
+          aws s3 cp s3://$AWS_S3_ARTIFACTS_BUCKET_NAME/$GIT_HASH/plan-dev.tar  plan-dev.tar
 
       - name: Unzip artifact
         run: |
