@@ -1,20 +1,24 @@
-name: Git Flow PROD Workload
+name: Git Flow DEV Workload
 on:
   pull_request:
     branches:
-      - master
+      - dev
   push:
     branches:
-      - master
+      - dev
 env:
   TERRAFORM_VERSION: 1.0.8
-  AWS_ROLE_ARN_PROD: arn:aws:iam::416419186814:role/pw-prod-terraform-state-manager
+  AWS_ROLE_ARN: arn:aws:iam::718665970908:role/pw-dev-terraform-state-manager
+  AWS_S3_ARTIFACTS_BUCKET_NAME: pw-dev-terraform-github-artifacts
+  AWS_WEB_IDENTITY_TOKEN_FILE: /tmp/awscreds
+  AWS_DEFAULT_REGION: eu-central-1
 jobs:
-  TerraformPlanProd:
-    name: Plan tfm Prod
+  TerraformPlanDev:
+    name: Plan tfm DEV
     runs-on: ubuntu-latest
+    environment: 'dev'
     concurrency:
-      group: prod-plan
+      group: dev-workload
     permissions:
       id-token: write
       contents: read
@@ -22,10 +26,6 @@ jobs:
     steps:
       - name: Configure AWS
         run: |
-          export AWS_ROLE_ARN=$AWS_ROLE_ARN_PROD
-          export AWS_WEB_IDENTITY_TOKEN_FILE=/tmp/awscreds
-          export AWS_DEFAULT_REGION=eu-central-1
-
           echo AWS_WEB_IDENTITY_TOKEN_FILE=$AWS_WEB_IDENTITY_TOKEN_FILE >> $GITHUB_ENV
           echo AWS_ROLE_ARN=$AWS_ROLE_ARN >> $GITHUB_ENV
           echo AWS_DEFAULT_REGION=$AWS_DEFAULT_REGION >> $GITHUB_ENV
@@ -39,8 +39,8 @@ jobs:
 
       - uses: actions/checkout@v2
 
-      - name: Copy Prod Terraform Backend config
-        run: cp ./backends/remote-backend-config-prod.tf .
+      - name: Copy Dev Terraform Backend config
+        run: cp ./backends/remote-backend-config-dev.tf .
 
       - name: Terraform Format
         id: fmt
@@ -51,13 +51,13 @@ jobs:
         run: |
           terraform version
           terraform init
-          bash scripts/init-workspace.sh prod
-          terraform workspace select prod
+          bash scripts/init-workspace.sh dev
+          terraform workspace select dev
 
       - name: Terraform plan
         id: plan
         run: |
-          terraform plan -var-file=tfvars/prod.tfvars -input=false -no-color -out plan-file
+          terraform plan -var-file=tfvars/dev.tfvars -input=false -no-color -out plan-file
         continue-on-error: true
 
       - name: Save Terraform Plan as PR Comment
@@ -74,22 +74,22 @@ jobs:
 
       - name: Prepare artifact
         run: |
-          tar cf plan-prod.tar plan-file .terraform
+          tar cf plan-dev.tar plan-file .terraform
 
       - name: Upload artifact
-        if: github.event.ref == 'refs/heads/master' && github.event_name == 'push'
-        uses: actions/upload-artifact@v2
-        with:
-          name: plan-prod.tar
-          path: plan-prod.tar
+        if: github.event.ref == 'refs/heads/dev' && github.event_name == 'push'
+        run: |
+          export GIT_HASH=$(git rev-parse --short "$GITHUB_SHA")
+          echo $GIT_HASH
+          aws s3 cp plan-dev.tar s3://$AWS_S3_ARTIFACTS_BUCKET_NAME/$GIT_HASH/plan-dev.tar --no-progress
 
-  TerraformApplyProd:
-    name: Apply tfm Prod
-    if: github.event.ref == 'refs/heads/master' && github.event_name == 'push'
-    needs: [TerraformPlanProd]
-    environment: 'prod'
+  TerraformApplyDev:
+    name: Apply tfm DEV
+    if: github.event.ref == 'refs/heads/dev' && github.event_name == 'push'
+    needs: [TerraformPlanDev]
+    environment: 'dev'
     concurrency:
-      group: prod-apply
+      group: dev-workload
     runs-on: ubuntu-latest
     permissions:
       id-token: write
@@ -97,10 +97,6 @@ jobs:
     steps:
       - name: Configure AWS
         run: |
-          export AWS_ROLE_ARN=$AWS_ROLE_ARN_PROD
-          export AWS_WEB_IDENTITY_TOKEN_FILE=/tmp/awscreds
-          export AWS_DEFAULT_REGION=eu-central-1
-
           echo AWS_WEB_IDENTITY_TOKEN_FILE=$AWS_WEB_IDENTITY_TOKEN_FILE >> $GITHUB_ENV
           echo AWS_ROLE_ARN=$AWS_ROLE_ARN >> $GITHUB_ENV
           echo AWS_DEFAULT_REGION=$AWS_DEFAULT_REGION >> $GITHUB_ENV
@@ -114,17 +110,18 @@ jobs:
 
       - uses: actions/checkout@v2
 
-      - name: Copy Prod Terraform Backend config
-        run: cp ./backends/remote-backend-config-prod.tf .
+      - name: Copy Dev Terraform Backend config
+        run: cp ./backends/remote-backend-config-dev.tf .
 
       - name: Download Artifact
-        uses: actions/download-artifact@v2
-        with:
-          name: plan-prod.tar
+        run: |
+          export GIT_HASH=$(git rev-parse --short "$GITHUB_SHA")
+          echo $GIT_HASH
+          aws s3 cp s3://$AWS_S3_ARTIFACTS_BUCKET_NAME/$GIT_HASH/plan-dev.tar  plan-dev.tar --no-progress
 
       - name: Unzip artifact
         run: |
-          tar xf plan-prod.tar
+          tar xf plan-dev.tar
 
       - name: Terraform init
         id: init
@@ -135,4 +132,6 @@ jobs:
       - name: Terraform apply
         run: |
           terraform apply -auto-approve -no-color -input=false plan-file
+
+
 
