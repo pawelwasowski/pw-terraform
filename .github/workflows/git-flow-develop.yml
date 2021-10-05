@@ -16,6 +16,7 @@ jobs:
   TerraformPlanDev:
     name: Plan tfm DEV
     runs-on: ubuntu-latest
+    environment: 'dev'
     concurrency:
       group: dev-workload
     permissions:
@@ -80,7 +81,7 @@ jobs:
         run: |
           export GIT_HASH=$(git rev-parse --short "$GITHUB_SHA")
           echo $GIT_HASH
-          aws s3 cp plan-dev.tar s3://$AWS_S3_ARTIFACTS_BUCKET_NAME/$GIT_HASH/plan-dev.tar
+          aws s3 cp plan-dev.tar s3://$AWS_S3_ARTIFACTS_BUCKET_NAME/$GIT_HASH/plan-dev.tar --no-progress
 
   TerraformApplyDev:
     name: Apply tfm DEV
@@ -116,7 +117,7 @@ jobs:
         run: |
           export GIT_HASH=$(git rev-parse --short "$GITHUB_SHA")
           echo $GIT_HASH
-          aws s3 cp s3://$AWS_S3_ARTIFACTS_BUCKET_NAME/$GIT_HASH/plan-dev.tar  plan-dev.tar
+          aws s3 cp s3://$AWS_S3_ARTIFACTS_BUCKET_NAME/$GIT_HASH/plan-dev.tar  plan-dev.tar --no-progress
 
       - name: Unzip artifact
         run: |
